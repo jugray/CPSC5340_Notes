@@ -6,11 +6,13 @@
     //
 
 import SwiftUI
+import FirebaseAuth
 
 struct NoteOverview: View {
     
     @StateObject var noteApp = NoteViewModel()
     @State var note = NoteModel(title: "", notesdata: "")
+    @AppStorage("uid") var userID : String = ""
     
     var body: some View {
         NavigationStack{
@@ -34,10 +36,24 @@ struct NoteOverview: View {
                 }
                 
                 Section {
-                    NavigationLink {
-                        AuthView()
-                    }label: {
-                        Text("Sign In")
+                    if userID == "" {
+                        NavigationLink {
+                            AuthView()
+                        }label: {
+                            Text("Sign In")
+                        }
+                    }
+                    else {
+                        Text("Current User (Tap to Sign Out): \(userID)")
+                            .onTapGesture {
+                                let firebaseAuth = Auth.auth()
+                                do {
+                                  try firebaseAuth.signOut()
+                                    userID = ""
+                                } catch let signOutError as NSError {
+                                  print("Error signing out: %@", signOutError)
+                                }
+                            }
                     }
                 }
             }
